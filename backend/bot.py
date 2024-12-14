@@ -11,8 +11,8 @@ from telegram.ext import (
     ContextTypes,
     filters
 )
-from models import db, User
-from main import app
+from backend.models import db, User
+from backend.main import app
 
 load_dotenv()
 
@@ -128,12 +128,16 @@ async def login_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
-async def logout(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def logout(update, context):
+    """Handles user logout."""
     session = context.user_data.get('session')
     if session:
-        session.get(f'{BASE_URL}/logout')
-        context.user_data.clear()
-        await update.message.reply_text("You have been logged out.")
+        response = session.get(f'{BASE_URL}/logout')  # Ensure this is the call being made
+        if response.status_code == 200:
+            context.user_data.clear()
+            await update.message.reply_text("You have been logged out.")
+        else:
+            await update.message.reply_text("Logout failed.")
     else:
         await update.message.reply_text("You are not logged in.")
 

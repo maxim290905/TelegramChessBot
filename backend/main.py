@@ -2,8 +2,8 @@ from flask import Flask, request, jsonify, session, render_template
 from flask_socketio import SocketIO, emit, join_room, disconnect
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_migrate import Migrate
-from models import db, User, Game
-from elo import calculate_elo
+from backend.models import db, User, Game
+from backend.elo import calculate_elo
 from werkzeug.security import generate_password_hash, check_password_hash
 import chess
 import logging
@@ -204,44 +204,39 @@ def login():
 @login_required
 def logout():
     """
-    Обрабатывает запрос на вход пользователя (логин) в систему.
+    Обрабатывает запрос на выход пользователя из системы.
 
-    Эта функция принимает имя пользователя и пароль, проверяет их наличие и корректность, 
-    а затем выполняет вход пользователя в систему. Если данные правильные, пользователю 
-    генерируется токен авторизации, который возвращается в ответе. В случае ошибки (неверные данные)
-    возвращается сообщение об ошибке и соответствующий код HTTP.
+    Эта функция выполняет выход текущего пользователя из системы, 
+    удаляя его сеанс и, при необходимости, аннулируя токен авторизации.
 
     Аргументы:
         Нет.
 
     Возвращает:
-        - Если вход успешен (имя пользователя и пароль верные): JSON-ответ с сообщением о успешном входе и 
-          токеном авторизации, а также кодом статуса 200.
-        - Если имя пользователя или пароль не указаны: JSON-ответ с сообщением об ошибке и кодом статуса 400.
-        - Если учетные данные неверны (неправильное имя пользователя или пароль): JSON-ответ с сообщением 
-          об ошибке и кодом статуса 400.
+        - Если выход успешен: JSON-ответ с сообщением о успешном выходе и кодом статуса 200.
+        - Если возникла ошибка при выходе: JSON-ответ с сообщением об ошибке и кодом статуса 400.
 
     Ошибки:
-        400: Если не указаны имя пользователя или пароль, либо если учетные данные неверны.
+        400: Если возникла ошибка при выполнении выхода.
         
     Примечания:
-        - Для проверки пароля используется метод "check_password", который сравнивает введенный пароль с 
-          сохраненным в базе данных.
-        - Если вход успешен, токен авторизации генерируется с помощью метода "generate_auth_token".
-        - Токен авторизации возвращается в ответе и может быть использован для аутентификации в будущих запросах.
+        - Используется декоратор @login_required для обеспечения доступа только авторизованным пользователям.
+        - Метод logout_user() из Flask-Login выполняет выход пользователя.
+        - Если используется токен авторизации, он должен быть аннулирован или удален здесь.
     """
-    username = request.form.get('username')
-    password = request.form.get('password')
-    if not username or not password:
-        return jsonify({'message': 'Username and password are required.'}), 400
-    user = User.query.filter_by(username=username).first()
-    if user and user.check_password(password):
-        login_user(user)
-        token = user.generate_auth_token()
-        return jsonify({'message': 'Login successful', 'auth_token': token}), 200
-    else:
-        return jsonify({'message': 'Invalid credentials'}), 400
-
+    try:
+        # Аннулируем токен авторизации, если используется
+        if current_user.auth_token:
+            current_user.revoke_auth_token()
+            db.session.commit()
+        
+        # Выполняем выход пользователя
+        logout_user()
+        return jsonify({'message': 'Logged out successfully.'}), 200
+    except Exception as e:
+        # Логирование ошибки (опционально)
+        app.logger.error(f"Logout failed: {e}")
+        return jsonify({'message': 'An error occurred during logout.'}), 400
 
 @app.route('/leaderboard')
 def leaderboard():
