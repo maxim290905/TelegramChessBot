@@ -5,13 +5,13 @@
 <img src="https://github.com/maxim290905/TelegramChessBot/blob/main/%20%20.png">
 <p>Далее для входа с помощью /login необходимо ввести логин и пароль, который пользователь придумал ранее.</p>
 <p>После пользователю предлагается на выбор два режима - локальный или онлайн.&nbsp;</p>
-![Scrin_2](https://github.com/maxim290905/TelegramChessBot/blob/main/Снимок%20экрана%202024-12-14%20в%2011.16.14.png)
+<img src="https://github.com/maxim290905/TelegramChessBot/blob/main/Снимок%20экрана%202024-12-14%20в%2011.16.14.png">
 <p>При успешном входе пользователю будет выдана команда /startgame, после которой бот пришлет ссылку на мини-приложение с шахматами.&nbsp;</p>
-![Scrin_3](https://github.com/maxim290905/TelegramChessBot/blob/main/Снимок%20экрана%202024-12-14%20в%2011.17.54.png)
+<img src=https://github.com/maxim290905/TelegramChessBot/blob/main/Снимок%20экрана%202024-12-14%20в%2011.17.54.png">
 <p>После пользователь попадает в мини-приложение, в котором ожидает начала игровой сессии.</p>
-![Scrin_4](https://github.com/maxim290905/TelegramChessBot/blob/main/Снимок%20экрана%202024-12-14%20в%2006.01.22.png)
+<img src="https://github.com/maxim290905/TelegramChessBot/blob/main/Снимок%20экрана%202024-12-14%20в%2006.01.22.png">
 <p>В игре присутствует таймер для обоих игроков. Пользователь может играть в шахматы.</p>
-![Scrin_5](https://github.com/maxim290905/TelegramChessBot/blob/main/Снимок%20экрана%202024-12-13%20в%2018.44.57.png)
+<img src="https://github.com/maxim290905/TelegramChessBot/blob/main/Снимок%20экрана%202024-12-13%20в%2018.44.57.png">
 <p>Также по команде /leaderboard в боте пользователь может посмотреть лидерборд, основанный на рейтинге elo.</p>
-![Scrin_6](https://github.com/maxim290905/TelegramChessBot/blob/main/IMG_6449.JPG)
+<img src="https://github.com/maxim290905/TelegramChessBot/blob/main/IMG_6449.JPG">
 <p>&nbsp;</p>
