@@ -1,0 +1,158 @@
+/* static/css/styles.css */
+
+/* Глобальные стили */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif; /* Обновлено для использования красивого шрифта */
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    overflow-x: hidden; /* Предотвращает горизонтальную прокрутку */
+}
+
+h1 {
+    margin: 20px 0;
+    font-size: 2em;
+}
+
+/* Панель информации */
+#info-panel {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 10px;
+    padding: 0 10px;
+}
+
+.player-info, .elo-info {
+    margin: 5px 15px;
+    font-size: 16px;
+    flex: 1 1 150px;
+    min-width: 120px;
+}
+
+#current-turn {
+    margin: 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Панель таймера */
+#timer-panel {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 10px;
+    padding: 0 10px;
+}
+
+.timer {
+    margin: 5px 15px;
+    font-size: 16px;
+    flex: 1 1 150px;
+    min-width: 120px;
+}
+
+/* Доска */
+#chess-board {
+    width: 90vw;
+    max-width: 500px;
+    height: 90vw;
+    max-height: 500px;
+    margin: 20px auto;
+}
+
+/* Панель управления */
+#controls {
+    margin: 20px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0 10px;
+}
+
+.control-button {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: background-color 0.3s;
+    flex: 1 1 120px;
+    min-width: 100px;
+}
+
+.control-button:hover {
+    background-color: #0056b3;
+}
+
+/* Статус */
+#status {
+    margin: 20px;
+    font-size: 16px;
+}
+
+/* Адаптивные стили для экранов шириной до 600px */
+@media (max-width: 600px) {
+    h1 {
+        font-size: 1.5em;
+    }
+
+    .player-info, .elo-info, .timer {
+        font-size: 14px;
+        margin: 5px 10px;
+        flex: 1 1 100px;
+    }
+
+    #current-turn {
+        font-size: 16px;
+    }
+
+    .control-button {
+        padding: 8px 16px;
+        font-size: 0.9em;
+        margin: 5px;
+        flex: 1 1 100px;
+        min-width: 80px;
+    }
+
+    #chess-board {
+        width: 95vw;
+        height: 95vw;
+    }
+
+    #info-panel, #timer-panel, #controls {
+        padding: 0 5px;
+    }
+}
+
+/* Дополнительные стили для предотвращения выхода элементов за пределы экрана */
+@media (max-width: 400px) {
+    .player-info, .elo-info, .timer {
+        font-size: 12px;
+        flex: 1 1 80px;
+    }
+
+    .control-button {
+        padding: 6px 12px;
+        font-size: 0.8em;
+        margin: 3px;
+        flex: 1 1 80px;
+        min-width: 60px;
+    }
+
+    #current-turn {
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 1.2em;
+    }
+}
