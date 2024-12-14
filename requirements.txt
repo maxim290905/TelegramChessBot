@@ -1,0 +1,13 @@
+Flask~=2.0.1
+Flask-Login~=0.5.0
+Flask-Migrate~=4.0.7
+Flask-SocketIO~=5.1.1
+Flask-SQLAlchemy~=2.5.1
+gevent~=24.11.1
+gevent-websocket~=0.10.1
+python-telegram-bot~=21.9
+python-chess~=0.31.4
+requests~=2.32.3
+Werkzeug~=2.0.1
+wsgigzip~=0.1.4
+python-dotenv~=0.21.1

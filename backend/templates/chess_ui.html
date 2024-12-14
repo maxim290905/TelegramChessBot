@@ -1,0 +1,53 @@
+<!-- templates/chess_ui.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet"
+      href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css"
+      integrity="sha384-q94+BZtLrkL1/ohfjR8c6L+A6qzNH9R2hBLwyoAfu3i/WCvQjzL2RQJ3uNHDISdU"
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pmYLk3C0lr/L3bgYQkq6F0OvKp+/k5iXV/xMXgqBjL3Q14DQcBivdk8K+fU8uUxj1R+eYH+g3rODlZpqKnzB3A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <h1>Chess Game</h1>
+    
+    <div id="info-panel">
+        <div class="player-info" id="player-white">White: Loading...</div>
+        <div class="elo-info" id="elo-white">White ELO: Loading...</div>
+        <div class="player-info" id="player-black">Black: Loading...</div>
+        <div class="elo-info" id="elo-black">Black ELO: Loading...</div>
+    </div>
+
+    <div id="current-turn">Current Turn: Loading...</div>
+    
+    <div id="timer-panel">
+        <div class="timer" id="timer-white">White Time Left: 10:00</div>
+        <div class="timer" id="timer-black">Black Time Left: 10:00</div>
+    </div>
+
+    <div id="chess-board"></div>
+    
+    <div id="controls">
+        <button class="control-button" id="resign-btn"><i class="fas fa-times"></i> Resign</button>
+        <button class="control-button" id="offer-draw-btn"><i class="fas fa-handshake"></i> Offer Draw</button>
+    </div>
+
+    <div id="status">Connecting to the game...</div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"
+    integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2"
+    crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.11.0/chess.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <script>
+        const username = "{{ username if username else 'Local Player' }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
