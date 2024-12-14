@@ -118,7 +118,7 @@ def play():
     if user.id not in [game.player_white_id, game.player_black_id]:
         return jsonify({'error': 'You are not part of this game'}), 403
 
-    return render_template('chess_ui.html', game_id=game_id, username=username)
+    return render_template('chess_ui.html', game_id=game_id, username=user.username)
 
 
 @app.route('/register', methods=['POST'])
@@ -202,7 +202,7 @@ def login():
 
 @app.route('/logout')
 @login_required
-def login():
+def logout():
     """
     Обрабатывает запрос на вход пользователя (логин) в систему.
 

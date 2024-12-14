@@ -181,7 +181,14 @@ function initializeLocalBoard() {
 
 function onDragStartLocal(source, piece, position, orientation) {
     if (!gameStarted || isGameOver) return false;
-}
+    // Разрешаем ходить только, если это ход белых и фигура белая
+    if (chessGame.turn() === 'w' && piece.search(/^w/) === -1) {
+      return false;
+    }
+    if (chessGame.turn() === 'b' && piece.search(/^b/) === -1) {
+      return false;
+    }
+  }
 
 /**
  * Обрабатывает событие перемещения фигуры на локальной доске.
@@ -224,7 +231,7 @@ function onSnapEndLocal() {
 }
 
 function switchOrientationLocal() {
-    currentPlayerLocal = (chessGame.turn() === 'w') ? 'black' : 'white';
+    currentPlayerLocal = (chessGame.turn() === 'w') ? 'white' : 'black';
     board.orientation(currentPlayerLocal);
     console.log(`Switched board orientation to ${currentPlayerLocal}`);
 }
@@ -271,23 +278,23 @@ if (localGame) {
     socket.on('game_info', (data) => {
         playerWhite = data.player_white;
         playerBlack = data.player_black;
+        
         playerWhiteElement.textContent = `White: ${playerWhite.username}`;
         playerBlackElement.textContent = `Black: ${playerBlack.username}`;
         eloWhiteElement.textContent = `White ELO: ${playerWhite.elorating}`;
         eloBlackElement.textContent = `Black ELO: ${playerBlack.elorating}`;
-        highlightYou(playerWhite.username, playerBlack.username);
-        
-        // Определение цвета игрока
+      
+        // Определяем цвет игрока
         if (playerWhite.username === username) {
-            myColor = 'white';
+          myColor = 'white';
+          playerWhiteElement.textContent += ' (You)';
         } else if (playerBlack.username === username) {
-            myColor = 'black';
+          myColor = 'black';
+          playerBlackElement.textContent += ' (You)';
         } else {
-            console.error('Cannot determine player color.');
-            statusElement.textContent = 'Error: Cannot determine your color.';
+          console.error('Cannot determine player color. Check username matching.');
         }
-    });
-
+      });
     socket.on('game_started', (data) => {
         statusElement.textContent = "Game started! You can make your move.";
         gameStarted = true;
