@@ -49,6 +49,25 @@ function updateEloDisplay(eloWhite, eloBlack) {
 }
 
 function startTimer() {
+    /**
+ * Запускает таймер игры и обновляет оставшееся время для каждого игрока.
+ * 
+ * Эта функция управляет обратным отсчетом времени для обоих игроков в шахматной игре. Она обрабатывает как локальные,
+ * так и онлайн-игры отдельно, проверяя, чей сейчас ход, и уменьшая оставшееся время для активного игрока.
+ * Если у игрока заканчивается время, игра завершается, и победитель определяется. Функция также обновляет отображение
+ * времени и отправляет обновленные данные на сервер для онлайн-игры.
+ * 
+ * Таймер останавливается, если игра завершена или если игра еще не началась. Таймер обновляется каждую секунду и
+ * автоматически останавливается, когда у игрока заканчивается время.
+ * 
+ * Поведение таймера зависит от того, играется ли игра локально или онлайн:
+ * - **Локальная игра**: Таймер отсчитывает время для каждого игрока локально. Обновления по сети не отправляются.
+ * - **Онлайн-игра**: Таймер отсчитывает время для текущего игрока и отправляет обновленное время на сервер через событие сокета.
+ * 
+ * Возвращает:
+ *   Функция не возвращает значения. Она изменяет состояние игры, обновляет отображение и отправляет
+ *   сообщения через сокет для онлайн-игры.
+ */
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
         if (!gameStarted || isGameOver) {
@@ -63,7 +82,7 @@ function startTimer() {
                     updateTimerDisplay();
                 } else {
                     clearInterval(timerInterval);
-                    statusElement.textContent = "White has run out of time. Black wins!";
+                    statusElement.textContent = "Белые проиграли по времени. Черные победили!";
                     gameOver('black');
                 }
             } else {
@@ -72,7 +91,7 @@ function startTimer() {
                     updateTimerDisplay();
                 } else {
                     clearInterval(timerInterval);
-                    statusElement.textContent = "Black has run out of time. White wins!";
+                    statusElement.textContent = "Черные проиграли по времени. Белые победили!";
                     gameOver('white');
                 }
             }
@@ -85,7 +104,7 @@ function startTimer() {
                     socket.emit('update_time', { game_id: gameId, color: 'white', time_left: timeLeftWhite });
                 } else {
                     clearInterval(timerInterval);
-                    statusElement.textContent = "White has run out of time. Black wins!";
+                    statusElement.textContent = "Белые проиграли по времени. Черные победили!";
                     gameOver('black');
                 }
             } else {
@@ -95,7 +114,7 @@ function startTimer() {
                     socket.emit('update_time', { game_id: gameId, color: 'black', time_left: timeLeftBlack });
                 } else {
                     clearInterval(timerInterval);
-                    statusElement.textContent = "Black has run out of time. White wins!";
+                    statusElement.textContent = "Черные проиграли по времени. Белые победили!";
                     gameOver('white');
                 }
             }
@@ -104,6 +123,25 @@ function startTimer() {
 }
 
 function gameOver(winnerColor) {
+    /**
+ * Завершается игра и определяется победитель.
+ * 
+ * Эта функция вызывается, когда игра заканчивается, и она выполняет несколько задач:
+ * - Обновляет флаг `isGameOver`, чтобы указать, что игра завершена.
+ * - Уничтожает объект доски, что позволяет освободить ресурсы и подготовиться к следующей игре.
+ * - В случае локальной игры выводится сообщение о победе на экране.
+ * - В случае онлайн-игры отправляется событие на сервер с результатом игры, а также выводится сообщение о победителе.
+ * 
+ * Если игра завершена, эта функция также обновляет статус игры, используя цвет победителя, который был передан в параметре `winnerColor`.
+ * 
+ * Примечания:
+ * - В случае локальной игры обновляется только отображение на экране, без отправки данных на сервер.
+ * - В случае онлайн-игры информация о завершении игры отправляется на сервер через сокет, и отображается сообщение о победе.
+ * 
+ * Аргументы:
+ *   - `winnerColor` (string): Цвет победителя, который может быть `'white'` или `'black'`. Используется для определения,
+ *     кто победил в игре и какого цвета игрок.
+ */
     isGameOver = true;
     board.destroy();
     if (localGame) {
@@ -119,6 +157,14 @@ function capitalizeFirstLetter(string) {
 }
 
 function initializeLocalBoard() {
+    /**
+ * Инициализирует локальную шахматную доску с начальной позицией и настройками.
+ * 
+ * Эта функция создает и настраивает шахматную доску с помощью библиотеки Chessboard.js. 
+ * Она задает начальную позицию фигур, настраивает поведение при перетаскивании фигур, 
+ * а также устанавливает тему для изображений фигур.
+ * После инициализации доски также обновляется отображение рейтинга ELO для обоих игроков.
+ */
     console.log("Initializing local board...");
     board = Chessboard('chess-board', {
         position: 'start',
@@ -137,6 +183,27 @@ function onDragStartLocal(source, piece, position, orientation) {
     if (!gameStarted || isGameOver) return false;
 }
 
+/**
+ * Обрабатывает событие перемещения фигуры на локальной доске.
+ * 
+ * Эта функция вызывается при перетаскивании фигуры на новую клетку на локальной шахматной доске. 
+ * Она пытается выполнить ход в объекте игры (`chessGame`) и, если ход является допустимым, обновляет 
+ * положение фигур на доске, изменяет текущее состояние игры и запускает таймер.
+ * Если ход недопустим, фигура возвращается на исходную клетку.
+ * 
+ * Примечания:
+ * - Функция автоматически выполняет превращение пешки в ферзя (promotion: 'q') при необходимости.
+ * - После выполнения хода обновляется состояние доски и отображается информация о текущем ходе.
+ * - Таймер игры перезапускается с каждым ходом, а также обновляется информация о текущем ходе.
+ * 
+ * Параметры:
+ *   - "source" (string): Исходная клетка, с которой была перемещена фигура
+ *   - "target" (string): Целевая клетка, на которую фигура была перемещена
+ * 
+ * Возвращаемое значение:
+ *   - Возвращает строку 'snapback', если ход недопустим, и фигура должна вернуться на исходную позицию.
+ *   - Ничего не возвращает в случае успешного выполнения хода.
+ */
 function onDropLocal(source, target) {
     const move = chessGame.move({
         from: source,
@@ -150,6 +217,7 @@ function onDropLocal(source, target) {
     switchOrientationLocal();
     startTimer();
 }
+
 
 function onSnapEndLocal() {
     board.position(chessGame.fen());
@@ -223,8 +291,6 @@ if (localGame) {
     socket.on('game_started', (data) => {
         statusElement.textContent = "Game started! You can make your move.";
         gameStarted = true;
-        // Удалите эту строку:
-        // myColor = data.your_color; // Use 'your_color' from the server
         currentTurnElement.textContent = `Current Turn: ${capitalizeFirstLetter(data.current_turn)}`;
         timeLeftWhite = data.time_left_white;
         timeLeftBlack = data.time_left_black;

@@ -27,6 +27,18 @@ REGISTER_USERNAME, REGISTER_PASSWORD = range(2)
 LOGIN_USERNAME, LOGIN_PASSWORD = range(2, 4)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Обрабатывает команду /start и отправляет приветственное сообщение.
+
+    Эта функция вызывается при использовании команды /start пользователем в чате с ботом.
+    Она отправляет приветственное сообщение с инструкциями по использованию бота, включая команды
+    для регистрации, входа в аккаунт, начала игры и игры локально.
+
+    Аргументы:
+        update (Update): Объект обновления, содержащий информацию о сообщении и отправителе.
+        context (ContextTypes.DEFAULT_TYPE): Контекст команды, содержащий информацию о контексте
+                                             и состояниях для обработки команд.
+    """
     await update.message.reply_text(
         "Welcome to Chess Bot!\n"
         "Use /register to create an account or /login to log in.\n"
@@ -43,6 +55,20 @@ async def register_username(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return REGISTER_PASSWORD
 
 async def register_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Обрабатывает процесс регистрации пользователя с паролем.
+
+    Эта функция вызывается после того, как пользователь вводит пароль для завершения регистрации.
+    Пароль передается в запрос к серверу, где он сохраняется вместе с ранее введенным именем пользователя.
+    В случае успешной регистрации отправляется подтверждающее сообщение, в случае ошибки — сообщение об ошибке.
+
+    Аргументы:
+        update (Update): Объект обновления, содержащий информацию о сообщении и отправителе, в данном случае о пароле пользователя.
+        context (ContextTypes.DEFAULT_TYPE): Контекст команды, содержащий данные, введенные пользователем, и другую информацию о процессе регистрации.
+
+    Возвращает:
+        ConversationHandler.END: Завершается текущий процесс разговора (conversation), переходя к окончанию регистрации.
+    """
     username = context.user_data['username']
     password = update.message.text
     response = requests.post(f'{BASE_URL}/register', data={'username': username, 'password': password})
@@ -63,6 +89,26 @@ async def login_username(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return LOGIN_PASSWORD
 
 async def login_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Обрабатывает процесс входа пользователя с использованием пароля.
+
+    Эта функция вызывается, когда пользователь вводит свой пароль для входа в систему. 
+    Функция отправляет POST-запрос на сервер с данными о пользователе и пароле, и в случае успешной авторизации 
+    сервер возвращает ответ с аутентификационным токеном, который сохраняется в контексте пользователя. 
+    В случае ошибки возвращается сообщение об ошибке.
+
+    Аргументы:
+        update (Update): Объект обновления, содержащий информацию о сообщении, в частности, о пароле пользователя.
+        context (ContextTypes.DEFAULT_TYPE): Контекст команды, содержащий данные, такие как имя пользователя, 
+                                              которое хранится в `context.user_data['username']`.
+
+    Возвращает:
+        ConversationHandler.END: Завершается текущее состояние в обработчике беседы.
+
+    Примечания:
+        - В случае успешного входа сервер возвращает токен аутентификации, который сохраняется в `context.user_data['auth_token']`.
+        - В случае ошибки, например, неверного пароля или отсутствующего пользователя, сервер вернет сообщение об ошибке, которое будет отправлено пользователю.
+    """
     username = context.user_data['username']
     password = update.message.text
     session = requests.Session()
@@ -73,11 +119,14 @@ async def login_password(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['auth_token'] = auth_token
         context.user_data['session'] = session
         context.user_data['username'] = username
-        await update.message.reply_text("Login successful! Use /startgame to play online or /playlocal to play locally.")
+        await update.message.reply_text(
+            "Login successful! Use /startgame to play online or /playlocal to play locally."
+        )
     else:
         error_message = response.json().get('message', 'Unknown error.')
         await update.message.reply_text(f"Login failed: {error_message}")
     return ConversationHandler.END
+
 
 async def logout(update: Update, context: ContextTypes.DEFAULT_TYPE):
     session = context.user_data.get('session')
@@ -89,16 +138,40 @@ async def logout(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("You are not logged in.")
 
 async def startgame(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Обрабатывает команду для начала новой игры.
+
+    Эта функция инициирует создание новой игры на сервере, если пользователь авторизован. Если пользователь 
+    не авторизован, он получает сообщение о необходимости войти в систему. В случае успешного создания игры, 
+    пользователю отправляется сообщение с ссылкой на игровую страницу через мини-приложение.
+
+    Аргументы:
+        update (Update): Объект обновления, содержащий информацию о сообщении от пользователя, которое вызвало команду.
+        context (ContextTypes.DEFAULT_TYPE): Контекст команды, содержащий данные пользователя, включая сессию.
+
+    Возвращает:
+        None: Функция отправляет сообщение пользователю и не возвращает значений.
+
+    Примечания:
+        - Если пользователь не авторизован (нет сессии), ему будет предложено сначала войти в систему.
+        - При успешном старте игры пользователю отправляется кнопка с ссылкой на страницу игры в мини-приложении.
+    
+    Ошибки:
+        - Если пользователь не авторизован, отправляется сообщение с просьбой войти в систему.
+        - Если при создании игры произошла ошибка, пользователю отправляется сообщение об ошибке.
+    """
     session = context.user_data.get('session')
+    
     if not session:
         await update.message.reply_text("You need to /login first.")
         return
-
     response = session.get(f'{BASE_URL}/start_game')
+    
     if response.status_code == 200:
         data = response.json()
         game_id = data['game_id']
         username = context.user_data.get('username')
+        
         with app.app_context():
             user = User.query.filter_by(username=username).first()
             if not user:
@@ -108,12 +181,14 @@ async def startgame(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         play_url = f'{FRONTEND_URL}/play?game_id={game_id}&token={token}&local=false'
         web_app = WebAppInfo(url=play_url)
+        
         await update.message.reply_text(
             "Game created! Use the MiniApp below to start playing:",
             reply_markup=InlineKeyboardMarkup.from_button(InlineKeyboardButton("Open Game", web_app=web_app))
         )
     else:
         await update.message.reply_text("Error starting game.")
+
 
 async def playlocal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     game_id = str(uuid.uuid4())
@@ -125,15 +200,35 @@ async def playlocal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Обрабатывает команду для получения таблицы лидеров.
+
+    Эта функция запрашивает данные о текущей таблице лидеров с сервера и отправляет пользователю отформатированный список 
+    игроков с их рейтингами ELO.
+
+    Аргументы:
+        update (Update): Объект обновления, содержащий информацию о сообщении от пользователя, которое вызвало команду.
+        context (ContextTypes.DEFAULT_TYPE): Контекст команды, содержащий данные пользователя и другие параметры.
+
+    Возвращает:
+        None
+        
+    Ошибки:
+        - Если запрос к серверу завершился с ошибкой, пользователю будет отправлено сообщение об ошибке.
+    """
     response = requests.get(f'{BASE_URL}/leaderboard')
+    
     if response.status_code == 200:
         data = response.json()
         leaderboard_text = "Leaderboard:\n"
+        
         for idx, user in enumerate(data, start=1):
             leaderboard_text += f"{idx}. {user['username']} - ELO: {int(user['elorating'])}\n"
+        
         await update.message.reply_text(leaderboard_text)
     else:
         await update.message.reply_text("Error fetching leaderboard.")
+
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Operation cancelled.")
